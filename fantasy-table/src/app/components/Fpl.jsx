@@ -6,7 +6,7 @@ const Fpl = ({ onDataFetched }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/fpl/')
+    axios.get('https://fantasy-table-server.vercel.app/api/fpl/')
       .then(response => {
         setData(response.data);
         if (onDataFetched) {

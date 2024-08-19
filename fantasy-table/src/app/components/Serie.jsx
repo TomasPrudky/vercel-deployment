@@ -6,7 +6,7 @@ const Serie = ({ onDataFetched }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/serie-a/')
+    axios.get('https://fantasy-table-server.vercel.app/api/serie-a/')
       .then(response => {
         setData(response.data);
         if (onDataFetched) {
