@@ -20,7 +20,7 @@ const CompleteTable = () => {
 
   useEffect(() => {
     // Fetch data from Serie API
-    axios.get('http://localhost:5000/api/serie-a/')
+    axios.get('https://fantasy-table-server.vercel.app/api/serie-a/')
       .then(response => {
         setDataSerie(response.data);
       })
@@ -30,7 +30,7 @@ const CompleteTable = () => {
       });
 
     // Fetch data from FPL API
-    axios.get('http://localhost:5000/api/fpl/')
+    axios.get('https://fantasy-table-server.vercel.app/api/fpl/')
       .then(response => {
         setDataFpl(response.data);
       })
