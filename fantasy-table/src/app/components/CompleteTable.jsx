@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 
 // Funkce pro odstranění diakritiky z textu
@@ -40,10 +40,7 @@ const CompleteTable = () => {
       });
   }, []);
 
-  if (error) return <p>Error: {error}</p>;
-
-  // Combine data from both sources
-  const combineData = () => {
+  const combinedData = useMemo(() => {
     if (!dataSerie || !dataFpl) return [];
 
     // Create a map from Serie data using normalized last name
@@ -76,13 +73,13 @@ const CompleteTable = () => {
 
     // Sort the array by totalPoints in descending order
     return combinedArray.sort((a, b) => b.totalPoints - a.totalPoints);
-  };
+  }, [dataSerie, dataFpl]);
 
-  const combinedData = combineData();
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div>
-      <h1>Celkova Fantasy tabulka</h1>
+      <h1>Overall Fantasy results</h1>
       {combinedData.length > 0 ? (
         <table>
           <thead>

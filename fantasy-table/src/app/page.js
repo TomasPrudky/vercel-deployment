@@ -10,7 +10,9 @@ export default function Home() {
   return (
     <div>
      <CompleteTable />
+     <hr/>
      <FplPage />
+     <hr/>
      <SeriePage />
     </div>
   );

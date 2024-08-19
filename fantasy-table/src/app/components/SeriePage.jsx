@@ -16,26 +16,36 @@ const SeriePage = () => {
 
   return (
     <div>
-      <h1>Data Fetch Example</h1>
+      <h1>Serie A Fantasy results</h1>
       <Serie onDataFetched={handleDataFetched} />
       {error && <p>Error: {error}</p>}
-      {data && (
+      {data ? (
         <div>
-          <h2>Standings</h2>
           {data.results.length > 0 ? (
-            <ul>
-              {data.results.map((item) => (
-                <li key={item.id}>
-                  <strong>Player Name:</strong> {item.manager}<br />
-                  <strong>Total Points:</strong> {item.total_points}<br />
-                  <strong>Entry Name:</strong> {item.name}
-                </li>
-              ))}
-            </ul>
+            <table>
+              <thead>
+                <tr>
+                  <th>Player Name</th>
+                  <th>Team Name</th>
+                  <th>Total Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.results.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.manager}</td>
+                    <td>{item.name}</td>
+                    <td>{item.total_points}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           ) : (
             <p>No data available</p>
           )}
         </div>
+      ) : (
+        <p>Loading Serie A Data...</p>
       )}
     </div>
   );
