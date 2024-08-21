@@ -10,7 +10,6 @@ const SeriePage = () => {
       setError(data.error);
     } else {
       setData(data);
-      console.log('Fetched data:', data); // Můžeš zde zpracovat data podle potřeby
     }
   };
 
@@ -31,8 +30,8 @@ const SeriePage = () => {
                 </tr>
               </thead>
               <tbody>
-                {data.standings.results.map((item) => (
-                  <tr key={item.id}>
+                {data.standings.results.map((item, index) => (
+                  <tr key={item.id || index}>
                     <td>{item.player_name}</td>
                     <td>{item.entry_name}</td>
                     <td>{item.total}</td>
