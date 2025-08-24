@@ -53,7 +53,7 @@ export default function CompleteTable() {
     fetchData();
   }, []);
 
-  if (loading) return <div>Načítám data…</div>;
+  if (loading) return <div>Loading Data...</div>;
   if (error) return <div>{error}</div>;
 
   return (
