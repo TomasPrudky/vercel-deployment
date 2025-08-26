@@ -7,10 +7,12 @@ export default function CompleteTable() {
   const [playersData, setPlayersData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
 
   const players = [
     { id: 1, sourceA: 70147727, sourceB: 43454, name: "Pavel Scheiner"},
-    { id: 2, sourceA: 63841682, sourceB: -1, name: "Marek Štencl"},
+    { id: 2, sourceA: 63841682, sourceB: 44933, name: "Marek Štencl"},
     { id: 3, sourceA: 69567445, sourceB: 44098, name: "Tomáš Bělehrádek" },
     { id: 4, sourceA: 68621775, sourceB: 42945, name: "Vojtěch Cichra"},
     { id: 5, sourceA: 62787347, sourceB: 41986, name: "Tomáš Prudký" },
@@ -21,30 +23,33 @@ export default function CompleteTable() {
   ];
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async () => {      
       try {
         const [serieRes, fplRes] = await Promise.all([
           axios.get('https://fantasy-table-server.vercel.app/api/serie-a/'),
-          axios.get('https://fantasy-table-server.vercel.app/api/fpl')
+          axios.get('https://fantasy-table-server.vercel.app/api/fpl/')
+          //axios.get('http://localhost:5000/api/serie-a/'),
+          //axios.get('http://localhost:5000/api/fpl')
         ]);
 
-        // Spočítat celkové body a vytvořit nové pole
         const combined = players.map(p => {
           const seriePlayer = serieRes.data?.data.find(item => item.id === p.sourceB);
           const fplPlayer = fplRes.data?.standings?.results.find(item => item.id === p.sourceA);
 
-          const totalPoints = (seriePlayer?.points || 0) + (fplPlayer?.total || 0);
+          let seriePoints = seriePlayer?.points || 0;
+          if (p.id === 2) seriePoints += 54; // bonus pro Stenclika
+
+          const totalPoints = seriePoints + (fplPlayer?.total || 0);
+
           return { ...p, totalPoints };
         });
 
-        // Seřadit podle celkových bodů sestupně
         combined.sort((a, b) => b.totalPoints - a.totalPoints);
 
         setPlayersData(combined);
-
       } catch (err) {
         console.error(err);
-        setError('Chyba při načítání dat');
+        setError('Error loading data');
       } finally {
         setLoading(false);
       }
@@ -59,20 +64,54 @@ export default function CompleteTable() {
   return (
     <div>
       <h1>Complete Fantasy Table 25/26</h1>
+      <label style={{ display: 'block', marginBottom: '10px' }}>
+        <input
+          type="checkbox"
+          checked={showAdvanced}
+          onChange={(e) => setShowAdvanced(e.target.checked)}
+        />{" "}
+        Show advanced stats
+      </label>
       <table>
         <thead>
           <tr>
+            <th>#</th>
             <th>Player</th>
-            <th>Overall points</th>
+            <th>Total Points</th>
+            {showAdvanced && <th>Diff to 1st</th>}
+            {showAdvanced && <th>Diff to Next</th>}
+            {showAdvanced && <th>Diff to Previous</th>}
           </tr>
         </thead>
         <tbody>
-          {playersData.map(p => (
-            <tr key={p.id}>
-              <td>{p.name}</td>
-              <td>{p.totalPoints}</td>
-            </tr>
-          ))}
+          {playersData.map((p, index) => {
+            const leaderPoints = playersData[0].totalPoints;
+            const prevPoints = playersData[index - 1]?.totalPoints ?? null;
+            const nextPoints = playersData[index + 1]?.totalPoints ?? null;
+
+            let rankLabel = index + 1;
+            if (index === 0) rankLabel = "🥇";
+            else if (index === 1) rankLabel = "🥈";
+            else if (index === 2) rankLabel = "🥉";
+            else if (index === playersData.length - 1) rankLabel = "⚰️";
+
+            return (
+              <tr key={p.id}>
+                <td>{rankLabel}</td>
+                <td>{p.name}</td>
+                <td>{p.totalPoints}</td>
+                {showAdvanced && (
+                  <td>{leaderPoints - p.totalPoints}</td>
+                )}
+                {showAdvanced && (
+                    <td>{prevPoints !== null ? `${prevPoints - p.totalPoints}` : "-"}</td>                        
+                )}
+                {showAdvanced && (
+                  <td>{nextPoints !== null ? `+${p.totalPoints - nextPoints}` : "-"}</td>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
