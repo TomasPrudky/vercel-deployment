@@ -2,9 +2,28 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box';
 import { players, BONUS_PLAYER_ID, BONUS_POINTS } from '../config/players';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
+
+const getMedal = (index, totalPlayers) => {
+  if (index === 0) return "🥇";
+  if (index === 1) return "🥈";
+  if (index === 2) return "🥉";
+  if (index === totalPlayers - 1) return "⚰️";
+  return index + 1;
+};
 
 export default function CompleteTable() {
   const [playersData, setPlayersData] = useState([]);
@@ -53,59 +72,83 @@ export default function CompleteTable() {
   if (loading) return <LoadingSpinner message="Loading Data..." />;
   if (error) return <ErrorMessage message={error} onRetry={fetchData} />;
 
+  const leaderPoints = playersData[0]?.totalPoints || 0;
+
   return (
-    <div>
-      <h1>Complete Fantasy Table 25/26</h1>
-      <label style={{ display: 'block', marginBottom: '10px' }}>
-        <input
-          type="checkbox"
-          checked={showAdvanced}
-          onChange={(e) => setShowAdvanced(e.target.checked)}
-        />{" "}
-        Show advanced stats
-      </label>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Player</th>
-            <th>Total Points</th>
-            {showAdvanced && <th>Diff to 1st</th>}
-            {showAdvanced && <th>Diff to Next</th>}
-            {showAdvanced && <th>Diff to Previous</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {playersData.map((p, index) => {
-            const leaderPoints = playersData[0].totalPoints;
-            const prevPoints = playersData[index - 1]?.totalPoints ?? null;
-            const nextPoints = playersData[index + 1]?.totalPoints ?? null;
+    <Box sx={{ width: '100%' }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Complete Fantasy Table 25/26
+      </Typography>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showAdvanced}
+            onChange={(e) => setShowAdvanced(e.target.checked)}
+          />
+        }
+        label="Show advanced stats"
+        sx={{ mb: 2 }}
+      />
+      <TableContainer component={Paper} elevation={2}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'primary.main' }}>
+              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>#</TableCell>
+              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Player</TableCell>
+              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Total Points</TableCell>
+              {showAdvanced && (
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to 1st</TableCell>
+              )}
+              {showAdvanced && (
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to Prev</TableCell>
+              )}
+              {showAdvanced && (
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to Next</TableCell>
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {playersData.map((p, index) => {
+              const prevPoints = playersData[index - 1]?.totalPoints ?? null;
+              const nextPoints = playersData[index + 1]?.totalPoints ?? null;
+              const diffTo1st = leaderPoints - p.totalPoints;
+              const diffToPrev = prevPoints !== null ? prevPoints - p.totalPoints : null;
+              const diffToNext = nextPoints !== null ? p.totalPoints - nextPoints : null;
 
-            let rankLabel = index + 1;
-            if (index === 0) rankLabel = "🥇";
-            else if (index === 1) rankLabel = "🥈";
-            else if (index === 2) rankLabel = "🥉";
-            else if (index === playersData.length - 1) rankLabel = "⚰️";
-
-            return (
-              <tr key={p.id}>
-                <td>{rankLabel}</td>
-                <td>{p.name}</td>
-                <td>{p.totalPoints}</td>
-                {showAdvanced && (
-                  <td>{leaderPoints - p.totalPoints}</td>
-                )}
-                {showAdvanced && (
-                    <td>{prevPoints !== null ? `${prevPoints - p.totalPoints}` : "-"}</td>                        
-                )}
-                {showAdvanced && (
-                  <td>{nextPoints !== null ? `+${p.totalPoints - nextPoints}` : "-"}</td>
-                )}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+              return (
+                <TableRow
+                  key={p.id}
+                  sx={{
+                    '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
+                    '&:hover': { backgroundColor: 'action.selected' }
+                  }}
+                >
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                    {getMedal(index, playersData.length)}
+                  </TableCell>
+                  <TableCell>{p.name}</TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>{p.totalPoints}</TableCell>
+                  {showAdvanced && (
+                    <TableCell sx={{ color: diffTo1st > 0 ? 'error.main' : 'success.main' }}>
+                      {diffTo1st > 0 ? `-${diffTo1st}` : '0'}
+                    </TableCell>
+                  )}
+                  {showAdvanced && (
+                    <TableCell sx={{ color: 'error.main' }}>
+                      {diffToPrev !== null ? `-${diffToPrev}` : "-"}
+                    </TableCell>
+                  )}
+                  {showAdvanced && (
+                    <TableCell sx={{ color: diffToNext > 0 ? 'success.main' : 'text.secondary' }}>
+                      {diffToNext !== null ? `+${diffToNext}` : "-"}
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }

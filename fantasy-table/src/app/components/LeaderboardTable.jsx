@@ -1,6 +1,17 @@
 'use client';
 
 import React, { useState } from 'react';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import Box from '@mui/material/Box';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 
@@ -26,58 +37,84 @@ const LeaderboardTable = ({
 
   if (loading) return <LoadingSpinner message={loadingMessage} />;
   if (error) return <ErrorMessage message={error} onRetry={onRetry} />;
-  if (!data || data.length === 0) return <p>No data available</p>;
+  if (!data || data.length === 0) return <Typography>No data available</Typography>;
 
   const sortedData = [...data].sort((a, b) => b[pointsKey] - a[pointsKey]);
 
   return (
-    <div>
-      <h1>{title}</h1>
-      <label style={{ display: 'block', marginBottom: '10px' }}>
-        <input
-          type="checkbox"
-          checked={showAdvanced}
-          onChange={(e) => setShowAdvanced(e.target.checked)}
-        />{" "}
-        Show advanced stats
-      </label>
-      <table>
-        <thead>
-          <tr>
-            <th>Rank</th>
-            {columns.map(col => (
-              <th key={col.key}>{col.header}</th>
-            ))}
-            <th>Total Points</th>
-            {showAdvanced && <th>Diff to Next</th>}
-            {showAdvanced && <th>Diff to Previous</th>}
-          </tr>
-        </thead>
-        <tbody>
-          {sortedData.map((row, index, arr) => {
-            const points = row[pointsKey];
-            const diffToPrev = index > 0 ? points - arr[index - 1][pointsKey] : null;
-            const diffToNext = index < arr.length - 1 ? points - arr[index + 1][pointsKey] : null;
+    <Box sx={{ width: '100%' }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        {title}
+      </Typography>
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showAdvanced}
+            onChange={(e) => setShowAdvanced(e.target.checked)}
+          />
+        }
+        label="Show advanced stats"
+        sx={{ mb: 2 }}
+      />
+      <TableContainer component={Paper} elevation={2}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'primary.main' }}>
+              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Rank</TableCell>
+              {columns.map(col => (
+                <TableCell key={col.key} sx={{ color: 'white', fontWeight: 'bold' }}>
+                  {col.header}
+                </TableCell>
+              ))}
+              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Total Points</TableCell>
+              {showAdvanced && (
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to Prev</TableCell>
+              )}
+              {showAdvanced && (
+                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to Next</TableCell>
+              )}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sortedData.map((row, index, arr) => {
+              const points = row[pointsKey];
+              const diffToPrev = index > 0 ? points - arr[index - 1][pointsKey] : null;
+              const diffToNext = index < arr.length - 1 ? points - arr[index + 1][pointsKey] : null;
 
-            return (
-              <tr key={row.id || index}>
-                <td>{getMedal(index, arr.length)}</td>
-                {columns.map(col => (
-                  <td key={col.key}>{col.render ? col.render(row) : row[col.key]}</td>
-                ))}
-                <td>{points}</td>
-                {showAdvanced && (
-                  <td>{diffToPrev !== null ? `${diffToPrev}` : "-"}</td>
-                )}
-                {showAdvanced && (
-                  <td>{diffToNext !== null ? `+${diffToNext}` : "-"}</td>
-                )}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+              return (
+                <TableRow
+                  key={row.id || index}
+                  sx={{
+                    '&:nth-of-type(odd)': { backgroundColor: 'action.hover' },
+                    '&:hover': { backgroundColor: 'action.selected' }
+                  }}
+                >
+                  <TableCell sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                    {getMedal(index, arr.length)}
+                  </TableCell>
+                  {columns.map(col => (
+                    <TableCell key={col.key}>
+                      {col.render ? col.render(row) : row[col.key]}
+                    </TableCell>
+                  ))}
+                  <TableCell sx={{ fontWeight: 'bold' }}>{points}</TableCell>
+                  {showAdvanced && (
+                    <TableCell sx={{ color: diffToPrev < 0 ? 'error.main' : 'text.secondary' }}>
+                      {diffToPrev !== null ? `${diffToPrev}` : "-"}
+                    </TableCell>
+                  )}
+                  {showAdvanced && (
+                    <TableCell sx={{ color: diffToNext > 0 ? 'success.main' : 'text.secondary' }}>
+                      {diffToNext !== null ? `+${diffToNext}` : "-"}
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 
