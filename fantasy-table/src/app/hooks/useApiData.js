@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
+import { getErrorMessage, logError } from '../utils/errorHandler';
 
 const useApiData = (endpoint, options = {}) => {
   const {
@@ -29,13 +30,13 @@ const useApiData = (endpoint, options = {}) => {
       setLastUpdated(new Date());
       setLoading(false);
     } catch (err) {
-      console.error(`Error fetching ${endpoint} (attempt ${attempt}):`, err);
+      logError(`useApiData:${endpoint}`, err);
 
       if (attempt < retryCount) {
         console.log(`Retrying ${endpoint}, attempt ${attempt}/${retryCount}`);
         setTimeout(() => fetchData(attempt + 1, isBackgroundRefresh), retryDelay);
       } else {
-        setError('Failed to fetch data after several attempts');
+        setError(getErrorMessage(err));
         setLoading(false);
       }
     }

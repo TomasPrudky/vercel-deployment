@@ -16,6 +16,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { players, BONUS_PLAYER_ID, BONUS_POINTS } from '../config/players';
+import { getErrorMessage, logError } from '../utils/errorHandler';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 
@@ -67,8 +68,8 @@ export default function CompleteTable() {
       setPlayersData(combined);
       setLastUpdated(new Date());
     } catch (err) {
-      console.error(err);
-      setError('Error loading data');
+      logError('CompleteTable:fetchData', err);
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
