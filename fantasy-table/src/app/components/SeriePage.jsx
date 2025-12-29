@@ -1,16 +1,12 @@
-import React, { useState } from 'react';
-import Serie from './Serie';
+'use client';
+
+import React from 'react';
 import LeaderboardTable from './LeaderboardTable';
+import useApiData from '../hooks/useApiData';
 import { players, BONUS_PLAYER_ID, BONUS_POINTS } from '../config/players';
 
 const SeriePage = () => {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-
-  const handleDataFetched = (fetchedData) => {
-    if (fetchedData.error) setError(fetchedData.error);
-    else setData(fetchedData);
-  };
+  const { data, loading, error } = useApiData('/api/serie-a/');
 
   const columns = [
     { key: 'playerName', header: 'Player Name' },
@@ -31,18 +27,15 @@ const SeriePage = () => {
   }) || [];
 
   return (
-    <div>
-      <Serie onDataFetched={handleDataFetched} />
-      <LeaderboardTable
-        title="Serie A Fantasy results"
-        data={processedData}
-        loading={!data && !error}
-        error={error}
-        columns={columns}
-        pointsKey="points"
-        loadingMessage="Loading Serie A Data..."
-      />
-    </div>
+    <LeaderboardTable
+      title="Serie A Fantasy results"
+      data={processedData}
+      loading={loading}
+      error={error}
+      columns={columns}
+      pointsKey="points"
+      loadingMessage="Loading Serie A Data..."
+    />
   );
 };
 

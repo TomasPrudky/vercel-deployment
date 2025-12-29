@@ -1,15 +1,11 @@
-import React, { useState } from 'react';
-import Fpl from './Fpl';
+'use client';
+
+import React from 'react';
 import LeaderboardTable from './LeaderboardTable';
+import useApiData from '../hooks/useApiData';
 
 const FplPage = () => {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-
-  const handleDataFetched = (fetchedData) => {
-    if (fetchedData.error) setError(fetchedData.error);
-    else setData(fetchedData);
-  };
+  const { data, loading, error } = useApiData('/api/fpl/');
 
   const columns = [
     { key: 'player_name', header: 'Player Name' },
@@ -22,18 +18,15 @@ const FplPage = () => {
   })) || [];
 
   return (
-    <div>
-      <Fpl onDataFetched={handleDataFetched} />
-      <LeaderboardTable
-        title="PL Fantasy results"
-        data={processedData}
-        loading={!data && !error}
-        error={error}
-        columns={columns}
-        pointsKey="points"
-        loadingMessage="Loading FPL Data..."
-      />
-    </div>
+    <LeaderboardTable
+      title="PL Fantasy results"
+      data={processedData}
+      loading={loading}
+      error={error}
+      columns={columns}
+      pointsKey="points"
+      loadingMessage="Loading FPL Data..."
+    />
   );
 };
 
