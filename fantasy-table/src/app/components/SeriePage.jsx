@@ -12,8 +12,8 @@ const SeriePage = () => {
   });
 
   const columns = [
-    { key: 'playerName', header: 'Player Name' },
-    { key: 'teamName', header: 'Team Name' }
+    { key: 'playerName', header: 'Player Name', shortHeader: 'Player' },
+    { key: 'teamName', header: 'Team Name', shortHeader: 'Team' }
   ];
 
   const processedData = data?.data?.map(item => {

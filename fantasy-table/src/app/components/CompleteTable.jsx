@@ -14,7 +14,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import { players, BONUS_PLAYER_ID, BONUS_POINTS } from '../config/players';
 import { getErrorMessage, logError } from '../utils/errorHandler';
 import LoadingSpinner from './LoadingSpinner';
@@ -37,6 +40,8 @@ export default function CompleteTable() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const intervalRef = useRef(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const fetchData = useCallback(async (isBackgroundRefresh = false) => {
     if (!isBackgroundRefresh) {
@@ -94,26 +99,40 @@ export default function CompleteTable() {
 
   const leaderPoints = playersData[0]?.totalPoints || 0;
 
+  // Compact cell style for mobile
+  const cellSx = isMobile ? { px: 1, py: 0.5, fontSize: '0.75rem' } : {};
+  const headerCellSx = {
+    color: 'white',
+    fontWeight: 'bold',
+    ...(isMobile ? { px: 1, py: 0.5, fontSize: '0.7rem' } : {})
+  };
+
   return (
-    <Box sx={{ width: '100%', px: { xs: 1, sm: 2 } }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-        <Typography variant="h4" component="h1" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-          Complete Fantasy Table 25/26
+    <Box sx={{ width: '100%', px: { xs: 0.5, sm: 2 } }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+        <Typography variant="h4" component="h1" sx={{ fontSize: { xs: '1.1rem', sm: '2rem' } }}>
+          {isMobile ? 'Fantasy Table 25/26' : 'Complete Fantasy Table 25/26'}
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {lastUpdated && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {lastUpdated && !isMobile && (
             <Typography variant="body2" color="text.secondary">
-              Updated: {lastUpdated.toLocaleTimeString()}
+              {lastUpdated.toLocaleTimeString()}
             </Typography>
           )}
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<RefreshIcon />}
-            onClick={() => fetchData()}
-          >
-            Refresh
-          </Button>
+          {isMobile ? (
+            <IconButton size="small" onClick={() => fetchData()} color="primary">
+              <RefreshIcon fontSize="small" />
+            </IconButton>
+          ) : (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<RefreshIcon />}
+              onClick={() => fetchData()}
+            >
+              Refresh
+            </Button>
+          )}
         </Box>
       </Box>
       <FormControlLabel
@@ -121,26 +140,27 @@ export default function CompleteTable() {
           <Checkbox
             checked={showAdvanced}
             onChange={(e) => setShowAdvanced(e.target.checked)}
+            size={isMobile ? 'small' : 'medium'}
           />
         }
-        label="Show advanced stats"
-        sx={{ mb: 2 }}
+        label={<Typography variant={isMobile ? 'body2' : 'body1'}>Advanced stats</Typography>}
+        sx={{ mb: 1 }}
       />
       <TableContainer component={Paper} elevation={2} sx={{ overflowX: 'auto' }}>
-        <Table sx={{ minWidth: 400 }}>
+        <Table size={isMobile ? 'small' : 'medium'}>
           <TableHead>
             <TableRow sx={{ backgroundColor: 'primary.main' }}>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>#</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Player</TableCell>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Total Points</TableCell>
+              <TableCell sx={headerCellSx}>#</TableCell>
+              <TableCell sx={headerCellSx}>{isMobile ? 'Name' : 'Player'}</TableCell>
+              <TableCell sx={headerCellSx}>{isMobile ? 'Pts' : 'Total Points'}</TableCell>
               {showAdvanced && (
-                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to 1st</TableCell>
+                <TableCell sx={headerCellSx}>{isMobile ? '△1st' : 'Diff to 1st'}</TableCell>
               )}
               {showAdvanced && (
-                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to Prev</TableCell>
+                <TableCell sx={headerCellSx}>{isMobile ? '△Prev' : 'Diff to Prev'}</TableCell>
               )}
               {showAdvanced && (
-                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to Next</TableCell>
+                <TableCell sx={headerCellSx}>{isMobile ? '△Next' : 'Diff to Next'}</TableCell>
               )}
             </TableRow>
           </TableHead>
@@ -152,6 +172,12 @@ export default function CompleteTable() {
               const diffToPrev = prevPoints !== null ? prevPoints - p.totalPoints : null;
               const diffToNext = nextPoints !== null ? p.totalPoints - nextPoints : null;
 
+              // Get short name for mobile (first name + last initial)
+              const nameParts = p.name.split(' ');
+              const shortName = isMobile && nameParts.length > 1
+                ? `${nameParts[0]} ${nameParts[nameParts.length - 1][0]}.`
+                : p.name;
+
               return (
                 <TableRow
                   key={p.id}
@@ -160,23 +186,23 @@ export default function CompleteTable() {
                     '&:hover': { backgroundColor: 'action.selected' }
                   }}
                 >
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  <TableCell sx={{ ...cellSx, fontWeight: 'bold', fontSize: isMobile ? '0.9rem' : '1.1rem' }}>
                     {getMedal(index, playersData.length)}
                   </TableCell>
-                  <TableCell>{p.name}</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>{p.totalPoints}</TableCell>
+                  <TableCell sx={cellSx}>{shortName}</TableCell>
+                  <TableCell sx={{ ...cellSx, fontWeight: 'bold' }}>{p.totalPoints}</TableCell>
                   {showAdvanced && (
-                    <TableCell sx={{ color: diffTo1st > 0 ? 'error.main' : 'success.main' }}>
+                    <TableCell sx={{ ...cellSx, color: diffTo1st > 0 ? 'error.main' : 'success.main' }}>
                       {diffTo1st > 0 ? `-${diffTo1st}` : '0'}
                     </TableCell>
                   )}
                   {showAdvanced && (
-                    <TableCell sx={{ color: 'error.main' }}>
+                    <TableCell sx={{ ...cellSx, color: 'error.main' }}>
                       {diffToPrev !== null ? `-${diffToPrev}` : "-"}
                     </TableCell>
                   )}
                   {showAdvanced && (
-                    <TableCell sx={{ color: diffToNext > 0 ? 'success.main' : 'text.secondary' }}>
+                    <TableCell sx={{ ...cellSx, color: diffToNext > 0 ? 'success.main' : 'text.secondary' }}>
                       {diffToNext !== null ? `+${diffToNext}` : "-"}
                     </TableCell>
                   )}

@@ -11,8 +11,8 @@ const FplPage = () => {
   });
 
   const columns = [
-    { key: 'player_name', header: 'Player Name' },
-    { key: 'entry_name', header: 'Team Name' }
+    { key: 'player_name', header: 'Player Name', shortHeader: 'Player' },
+    { key: 'entry_name', header: 'Team Name', shortHeader: 'Team' }
   ];
 
   const processedData = data?.standings?.results?.map(row => ({

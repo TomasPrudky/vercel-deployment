@@ -13,7 +13,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { useTheme } from '@mui/material/styles';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 
@@ -37,6 +40,8 @@ const LeaderboardTable = ({
   lastUpdated
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (loading) return <LoadingSpinner message={loadingMessage} />;
   if (error) return <ErrorMessage message={error} onRetry={onRetry} />;
@@ -44,27 +49,41 @@ const LeaderboardTable = ({
 
   const sortedData = [...data].sort((a, b) => b[pointsKey] - a[pointsKey]);
 
+  // Compact cell style for mobile
+  const cellSx = isMobile ? { px: 1, py: 0.5, fontSize: '0.75rem' } : {};
+  const headerCellSx = {
+    color: 'white',
+    fontWeight: 'bold',
+    ...(isMobile ? { px: 1, py: 0.5, fontSize: '0.7rem' } : {})
+  };
+
   return (
-    <Box sx={{ width: '100%', px: { xs: 1, sm: 2 } }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-        <Typography variant="h4" component="h1" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+    <Box sx={{ width: '100%', px: { xs: 0.5, sm: 2 } }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+        <Typography variant="h4" component="h1" sx={{ fontSize: { xs: '1.2rem', sm: '2rem' } }}>
           {title}
         </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {lastUpdated && (
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          {lastUpdated && !isMobile && (
             <Typography variant="body2" color="text.secondary">
-              Updated: {lastUpdated.toLocaleTimeString()}
+              {lastUpdated.toLocaleTimeString()}
             </Typography>
           )}
           {onRetry && (
-            <Button
-              variant="outlined"
-              size="small"
-              startIcon={<RefreshIcon />}
-              onClick={onRetry}
-            >
-              Refresh
-            </Button>
+            isMobile ? (
+              <IconButton size="small" onClick={onRetry} color="primary">
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            ) : (
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<RefreshIcon />}
+                onClick={onRetry}
+              >
+                Refresh
+              </Button>
+            )
           )}
         </Box>
       </Box>
@@ -73,27 +92,28 @@ const LeaderboardTable = ({
           <Checkbox
             checked={showAdvanced}
             onChange={(e) => setShowAdvanced(e.target.checked)}
+            size={isMobile ? 'small' : 'medium'}
           />
         }
-        label="Show advanced stats"
-        sx={{ mb: 2 }}
+        label={<Typography variant={isMobile ? 'body2' : 'body1'}>Advanced stats</Typography>}
+        sx={{ mb: 1 }}
       />
       <TableContainer component={Paper} elevation={2} sx={{ overflowX: 'auto' }}>
-        <Table sx={{ minWidth: 500 }}>
+        <Table size={isMobile ? 'small' : 'medium'}>
           <TableHead>
             <TableRow sx={{ backgroundColor: 'primary.main' }}>
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Rank</TableCell>
+              <TableCell sx={headerCellSx}>#</TableCell>
               {columns.map(col => (
-                <TableCell key={col.key} sx={{ color: 'white', fontWeight: 'bold' }}>
-                  {col.header}
+                <TableCell key={col.key} sx={headerCellSx}>
+                  {isMobile ? (col.shortHeader || col.header) : col.header}
                 </TableCell>
               ))}
-              <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Total Points</TableCell>
+              <TableCell sx={headerCellSx}>{isMobile ? 'Pts' : 'Total Points'}</TableCell>
               {showAdvanced && (
-                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to Prev</TableCell>
+                <TableCell sx={headerCellSx}>{isMobile ? '△Prev' : 'Diff to Prev'}</TableCell>
               )}
               {showAdvanced && (
-                <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Diff to Next</TableCell>
+                <TableCell sx={headerCellSx}>{isMobile ? '△Next' : 'Diff to Next'}</TableCell>
               )}
             </TableRow>
           </TableHead>
@@ -111,22 +131,22 @@ const LeaderboardTable = ({
                     '&:hover': { backgroundColor: 'action.selected' }
                   }}
                 >
-                  <TableCell sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                  <TableCell sx={{ ...cellSx, fontWeight: 'bold', fontSize: isMobile ? '0.9rem' : '1.1rem' }}>
                     {getMedal(index, arr.length)}
                   </TableCell>
                   {columns.map(col => (
-                    <TableCell key={col.key}>
+                    <TableCell key={col.key} sx={cellSx}>
                       {col.render ? col.render(row) : row[col.key]}
                     </TableCell>
                   ))}
-                  <TableCell sx={{ fontWeight: 'bold' }}>{points}</TableCell>
+                  <TableCell sx={{ ...cellSx, fontWeight: 'bold' }}>{points}</TableCell>
                   {showAdvanced && (
-                    <TableCell sx={{ color: diffToPrev < 0 ? 'error.main' : 'text.secondary' }}>
+                    <TableCell sx={{ ...cellSx, color: diffToPrev < 0 ? 'error.main' : 'text.secondary' }}>
                       {diffToPrev !== null ? `${diffToPrev}` : "-"}
                     </TableCell>
                   )}
                   {showAdvanced && (
-                    <TableCell sx={{ color: diffToNext > 0 ? 'success.main' : 'text.secondary' }}>
+                    <TableCell sx={{ ...cellSx, color: diffToNext > 0 ? 'success.main' : 'text.secondary' }}>
                       {diffToNext !== null ? `+${diffToNext}` : "-"}
                     </TableCell>
                   )}
