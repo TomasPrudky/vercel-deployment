@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import axios from 'axios';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,9 +13,13 @@ import Typography from '@mui/material/Typography';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { players, BONUS_PLAYER_ID, BONUS_POINTS } from '../config/players';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
+
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
 const getMedal = (index, totalPlayers) => {
   if (index === 0) return "🥇";
@@ -30,9 +34,13 @@ export default function CompleteTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const intervalRef = useRef(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (isBackgroundRefresh = false) => {
+    if (!isBackgroundRefresh) {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -57,6 +65,7 @@ export default function CompleteTable() {
       combined.sort((a, b) => b.totalPoints - a.totalPoints);
 
       setPlayersData(combined);
+      setLastUpdated(new Date());
     } catch (err) {
       console.error(err);
       setError('Error loading data');
@@ -67,6 +76,16 @@ export default function CompleteTable() {
 
   useEffect(() => {
     fetchData();
+
+    intervalRef.current = setInterval(() => {
+      fetchData(true); // Background refresh
+    }, REFRESH_INTERVAL);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
   }, [fetchData]);
 
   if (loading) return <LoadingSpinner message="Loading Data..." />;
@@ -76,9 +95,26 @@ export default function CompleteTable() {
 
   return (
     <Box sx={{ width: '100%', px: { xs: 1, sm: 2 } }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-        Complete Fantasy Table 25/26
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+        <Typography variant="h4" component="h1" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+          Complete Fantasy Table 25/26
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {lastUpdated && (
+            <Typography variant="body2" color="text.secondary">
+              Updated: {lastUpdated.toLocaleTimeString()}
+            </Typography>
+          )}
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<RefreshIcon />}
+            onClick={() => fetchData()}
+          >
+            Refresh
+          </Button>
+        </Box>
+      </Box>
       <FormControlLabel
         control={
           <Checkbox

@@ -5,7 +5,10 @@ import LeaderboardTable from './LeaderboardTable';
 import useApiData from '../hooks/useApiData';
 
 const FplPage = () => {
-  const { data, loading, error, refetch } = useApiData('/api/fpl/');
+  const { data, loading, error, refetch, lastUpdated } = useApiData('/api/fpl/', {
+    autoRefresh: true,
+    refreshInterval: 5 * 60 * 1000 // 5 minutes
+  });
 
   const columns = [
     { key: 'player_name', header: 'Player Name' },
@@ -27,6 +30,7 @@ const FplPage = () => {
       pointsKey="points"
       loadingMessage="Loading FPL Data..."
       onRetry={refetch}
+      lastUpdated={lastUpdated}
     />
   );
 };

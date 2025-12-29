@@ -12,6 +12,8 @@ import Typography from '@mui/material/Typography';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import LoadingSpinner from './LoadingSpinner';
 import ErrorMessage from './ErrorMessage';
 
@@ -31,7 +33,8 @@ const LeaderboardTable = ({
   columns,
   pointsKey = 'points',
   loadingMessage = 'Loading data...',
-  onRetry
+  onRetry,
+  lastUpdated
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -43,9 +46,28 @@ const LeaderboardTable = ({
 
   return (
     <Box sx={{ width: '100%', px: { xs: 1, sm: 2 } }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
-        {title}
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+        <Typography variant="h4" component="h1" sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
+          {title}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {lastUpdated && (
+            <Typography variant="body2" color="text.secondary">
+              Updated: {lastUpdated.toLocaleTimeString()}
+            </Typography>
+          )}
+          {onRetry && (
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<RefreshIcon />}
+              onClick={onRetry}
+            >
+              Refresh
+            </Button>
+          )}
+        </Box>
+      </Box>
       <FormControlLabel
         control={
           <Checkbox

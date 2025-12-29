@@ -6,7 +6,10 @@ import useApiData from '../hooks/useApiData';
 import { players, BONUS_PLAYER_ID, BONUS_POINTS } from '../config/players';
 
 const SeriePage = () => {
-  const { data, loading, error, refetch } = useApiData('/api/serie-a/');
+  const { data, loading, error, refetch, lastUpdated } = useApiData('/api/serie-a/', {
+    autoRefresh: true,
+    refreshInterval: 5 * 60 * 1000 // 5 minutes
+  });
 
   const columns = [
     { key: 'playerName', header: 'Player Name' },
@@ -36,6 +39,7 @@ const SeriePage = () => {
       pointsKey="points"
       loadingMessage="Loading Serie A Data..."
       onRetry={refetch}
+      lastUpdated={lastUpdated}
     />
   );
 };
