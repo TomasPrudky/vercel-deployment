@@ -25,11 +25,10 @@ export default function CompleteTable() {
   useEffect(() => {
     const fetchData = async () => {      
       try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
         const [serieRes, fplRes] = await Promise.all([
-          //axios.get('https://fantasy-table-server.vercel.app/api/serie-a/'),
-          //axios.get('https://fantasy-table-server.vercel.app/api/fpl/')
-          axios.get('http://localhost:5000/api/serie-a/'),
-          axios.get('http://localhost:5000/api/fpl')
+          axios.get(`${apiUrl}/api/serie-a/`),
+          axios.get(`${apiUrl}/api/fpl/`)
         ]);
 
         const combined = players.map(p => {
