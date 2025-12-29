@@ -2,25 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { players, BONUS_PLAYER_ID, BONUS_POINTS } from '../config/players';
 
 export default function CompleteTable() {
   const [playersData, setPlayersData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
-
-
-  const players = [
-    { id: 1, sourceA: 70147727, sourceB: 43454, name: "Pavel Scheiner"},
-    { id: 2, sourceA: 63841682, sourceB: 44933, name: "Marek Štencl"},
-    { id: 3, sourceA: 69567445, sourceB: 44098, name: "Tomáš Bělehrádek" },
-    { id: 4, sourceA: 68621775, sourceB: 42945, name: "Vojtěch Cichra"},
-    { id: 5, sourceA: 62787347, sourceB: 41986, name: "Tomáš Prudký" },
-    { id: 6, sourceA: 63159074, sourceB: 44460, name: "Zdenek Stanek"},
-    { id: 7, sourceA: 58126350, sourceB: 42330, name: "Jakub Odehnal" },
-    { id: 8, sourceA: 71989614, sourceB: 43160, name: "Stanislav Dvořáček" },
-    { id: 9, sourceA: 61755492, sourceB: 42290, name: "Jan Prochazka" }
-  ];
 
   useEffect(() => {
     const fetchData = async () => {      
@@ -36,7 +24,7 @@ export default function CompleteTable() {
           const fplPlayer = fplRes.data?.standings?.results.find(item => item.id === p.sourceA);
 
           let seriePoints = seriePlayer?.points || 0;
-          if (p.id === 2) seriePoints += 54; // bonus pro Stenclika
+          if (p.id === BONUS_PLAYER_ID) seriePoints += BONUS_POINTS;
 
           const totalPoints = seriePoints + (fplPlayer?.total || 0);
 
