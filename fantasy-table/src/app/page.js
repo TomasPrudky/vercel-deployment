@@ -26,7 +26,7 @@ export default function Home() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <Header />
       <Container maxWidth="lg">
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
