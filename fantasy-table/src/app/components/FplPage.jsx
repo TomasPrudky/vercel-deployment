@@ -5,7 +5,7 @@ import LeaderboardTable from './LeaderboardTable';
 import useApiData from '../hooks/useApiData';
 
 const FplPage = () => {
-  const { data, loading, error } = useApiData('/api/fpl/');
+  const { data, loading, error, refetch } = useApiData('/api/fpl/');
 
   const columns = [
     { key: 'player_name', header: 'Player Name' },
@@ -26,6 +26,7 @@ const FplPage = () => {
       columns={columns}
       pointsKey="points"
       loadingMessage="Loading FPL Data..."
+      onRetry={refetch}
     />
   );
 };

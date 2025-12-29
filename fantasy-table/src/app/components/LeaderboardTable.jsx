@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 
 const getMedal = (index, totalPlayers) => {
   if (index === 0) return "🥇";
@@ -17,12 +19,13 @@ const LeaderboardTable = ({
   error,
   columns,
   pointsKey = 'points',
-  loadingMessage = 'Loading data...'
+  loadingMessage = 'Loading data...',
+  onRetry
 }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  if (loading) return <p>{loadingMessage}</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return <LoadingSpinner message={loadingMessage} />;
+  if (error) return <ErrorMessage message={error} onRetry={onRetry} />;
   if (!data || data.length === 0) return <p>No data available</p>;
 
   const sortedData = [...data].sort((a, b) => b[pointsKey] - a[pointsKey]);

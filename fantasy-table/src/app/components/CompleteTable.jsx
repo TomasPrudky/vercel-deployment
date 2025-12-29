@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { players, BONUS_PLAYER_ID, BONUS_POINTS } from '../config/players';
+import LoadingSpinner from './LoadingSpinner';
+import ErrorMessage from './ErrorMessage';
 
 export default function CompleteTable() {
   const [playersData, setPlayersData] = useState([]);
@@ -10,43 +12,46 @@ export default function CompleteTable() {
   const [error, setError] = useState(null);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {      
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        const [serieRes, fplRes] = await Promise.all([
-          axios.get(`${apiUrl}/api/serie-a/`),
-          axios.get(`${apiUrl}/api/fpl/`)
-        ]);
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
 
-        const combined = players.map(p => {
-          const seriePlayer = serieRes.data?.data.find(item => item.id === p.sourceB);
-          const fplPlayer = fplRes.data?.standings?.results.find(item => item.id === p.sourceA);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const [serieRes, fplRes] = await Promise.all([
+        axios.get(`${apiUrl}/api/serie-a/`),
+        axios.get(`${apiUrl}/api/fpl/`)
+      ]);
 
-          let seriePoints = seriePlayer?.points || 0;
-          if (p.id === BONUS_PLAYER_ID) seriePoints += BONUS_POINTS;
+      const combined = players.map(p => {
+        const seriePlayer = serieRes.data?.data.find(item => item.id === p.sourceB);
+        const fplPlayer = fplRes.data?.standings?.results.find(item => item.id === p.sourceA);
 
-          const totalPoints = seriePoints + (fplPlayer?.total || 0);
+        let seriePoints = seriePlayer?.points || 0;
+        if (p.id === BONUS_PLAYER_ID) seriePoints += BONUS_POINTS;
 
-          return { ...p, totalPoints };
-        });
+        const totalPoints = seriePoints + (fplPlayer?.total || 0);
 
-        combined.sort((a, b) => b.totalPoints - a.totalPoints);
+        return { ...p, totalPoints };
+      });
 
-        setPlayersData(combined);
-      } catch (err) {
-        console.error(err);
-        setError('Error loading data');
-      } finally {
-        setLoading(false);
-      }
-    };
+      combined.sort((a, b) => b.totalPoints - a.totalPoints);
 
-    fetchData();
+      setPlayersData(combined);
+    } catch (err) {
+      console.error(err);
+      setError('Error loading data');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  if (loading) return <div>Loading Data...</div>;
-  if (error) return <div>{error}</div>;
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  if (loading) return <LoadingSpinner message="Loading Data..." />;
+  if (error) return <ErrorMessage message={error} onRetry={fetchData} />;
 
   return (
     <div>
