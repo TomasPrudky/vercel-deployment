@@ -42,8 +42,8 @@ const LeaderboardTable = ({
   const sortedData = [...data].sort((a, b) => b[pointsKey] - a[pointsKey]);
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+    <Box sx={{ width: '100%', px: { xs: 1, sm: 2 } }}>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ fontSize: { xs: '1.5rem', sm: '2rem' } }}>
         {title}
       </Typography>
       <FormControlLabel
@@ -56,8 +56,8 @@ const LeaderboardTable = ({
         label="Show advanced stats"
         sx={{ mb: 2 }}
       />
-      <TableContainer component={Paper} elevation={2}>
-        <Table>
+      <TableContainer component={Paper} elevation={2} sx={{ overflowX: 'auto' }}>
+        <Table sx={{ minWidth: 500 }}>
           <TableHead>
             <TableRow sx={{ backgroundColor: 'primary.main' }}>
               <TableCell sx={{ color: 'white', fontWeight: 'bold' }}>Rank</TableCell>
