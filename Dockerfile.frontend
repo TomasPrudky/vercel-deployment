@@ -1,0 +1,18 @@
+# Frontend Dockerfile (Next.js)
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY fantasy-table/package*.json ./
+RUN npm install
+
+# Copy source code
+COPY fantasy-table ./
+
+# Build the application
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]

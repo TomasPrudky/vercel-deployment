@@ -1,0 +1,15 @@
+# Backend Dockerfile (Express proxy server)
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY proxy-server/package*.json ./
+RUN npm install --production
+
+# Copy source code
+COPY proxy-server ./
+
+EXPOSE 5000
+
+CMD ["node", "index.js"]
