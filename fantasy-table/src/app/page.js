@@ -1,19 +1,21 @@
 'use client';
 
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import SeriePage from '../app/components/SeriePage'; // Importuj komponentu Serie
-import FplPage from '../app/components/FplPage';     // Importuj komponentu Fpl
-import CompleteTable from './components/CompleteTable';        
+import dynamic from 'next/dynamic';
+
+// Vypne server-side rendering pro tabulky, čímž zcela eliminuje hydration mismatch
+const CompleteTable = dynamic(() => import('./components/CompleteTable'), { ssr: false });
+const FplPage = dynamic(() => import('./components/FplPage'), { ssr: false });
+const SeriePage = dynamic(() => import('./components/SeriePage'), { ssr: false });
 
 export default function Home() {
   return (
-    <div>
-      <CompleteTable />  
-     <hr/>
+    <main style={{ padding: '20px', fontFamily: 'sans-serif' }}>
+      <CompleteTable />
+      <hr style={{ margin: '30px 0' }} />
       <FplPage />
-     <hr/>
+      <hr style={{ margin: '30px 0' }} />
       <SeriePage />
-    </div>
+    </main>
   );
 }

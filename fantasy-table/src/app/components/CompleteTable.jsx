@@ -11,15 +11,15 @@ export default function CompleteTable() {
 
 
   const players = [
-    { id: 1, sourceA: 70147727, sourceB: 43454, name: "Pavel Scheiner"},
-    { id: 2, sourceA: 63841682, sourceB: 44933, name: "Marek Štencl"},
-    { id: 3, sourceA: 69567445, sourceB: 44098, name: "Tomáš Bělehrádek" },
-    { id: 4, sourceA: 68621775, sourceB: 42945, name: "Vojtěch Cichra"},
-    { id: 5, sourceA: 62787347, sourceB: 41986, name: "Tomáš Prudký" },
-    { id: 6, sourceA: 63159074, sourceB: 44460, name: "Zdenek Stanek"},
-    { id: 7, sourceA: 58126350, sourceB: 42330, name: "Jakub Odehnal" },
-    { id: 8, sourceA: 71989614, sourceB: 43160, name: "Stanislav Dvořáček" },
-    { id: 9, sourceA: 61755492, sourceB: 42290, name: "Jan Prochazka" }
+    { id: 1, sourceA: 4329613, sourceB: 725, name: "Pavel Scheiner" },
+    { id: 2, sourceA: 4589170, sourceB: 1019, name: "Lukáš Budiš" },
+    { id: 3, sourceA: 6411289, sourceB: 1132, name: "Tomáš Bělehrádek" },
+    { id: 4, sourceA: 1884869, sourceB: 969, name: "Vojtěch Cichra" },
+    { id: 5, sourceA: 48521, sourceB: 236, name: "Tomáš Prudký" },
+    { id: 6, sourceA: 3659748, sourceB: 1177, name: "Zdenek Stanek" },
+    { id: 7, sourceA: 1881097, sourceB: 288, name: "Jakub Odehnal" },
+    { id: 8, sourceA: 1882099, sourceB: 927, name: "Stanislav Dvořáček" },
+    { id: 9, sourceA: 730983, sourceB: 219, name: "Jan Prochazka" }
   ];
 
   useEffect(() => {
@@ -32,12 +32,14 @@ export default function CompleteTable() {
           axios.get('http://localhost:5000/api/fpl')
         ]);
 
-        const combined = players.map(p => {
-          const seriePlayer = serieRes.data?.data.find(item => item.id === p.sourceB);
-          const fplPlayer = fplRes.data?.standings?.results.find(item => item.id === p.sourceA);
+        const serieList = Array.isArray(serieRes.data) ? serieRes.data : [];
+        const fplList = fplRes.data?.standings?.results || [];
 
-          let seriePoints = seriePlayer?.points || 0;
-          if (p.id === 2) seriePoints += 54; // bonus pro Stenclika
+        const combined = players.map(p => {
+          const seriePlayer = serieList.find(item => (item.teamId || item.id) === p.sourceB);
+          const fplPlayer = fplList.find(item => item.entry === p.sourceA);
+
+          let seriePoints = seriePlayer?.totalPoints ?? seriePlayer?.points ?? 0;
 
           const totalPoints = seriePoints + (fplPlayer?.total || 0);
 
@@ -62,7 +64,7 @@ export default function CompleteTable() {
   if (error) return <div>{error}</div>;
 
   return (
-    <div>
+    <div suppressHydrationWarning>
       <h1>Complete Fantasy Table 25/26</h1>
       <label style={{ display: 'block', marginBottom: '10px' }}>
         <input
@@ -85,7 +87,7 @@ export default function CompleteTable() {
         </thead>
         <tbody>
           {playersData.map((p, index) => {
-            const leaderPoints = playersData[0].totalPoints;
+            const leaderPoints = playersData[0]?.totalPoints ?? 0;
             const prevPoints = playersData[index - 1]?.totalPoints ?? null;
             const nextPoints = playersData[index + 1]?.totalPoints ?? null;
 
@@ -104,7 +106,7 @@ export default function CompleteTable() {
                   <td>{leaderPoints - p.totalPoints}</td>
                 )}
                 {showAdvanced && (
-                    <td>{prevPoints !== null ? `${prevPoints - p.totalPoints}` : "-"}</td>                        
+                  <td>{prevPoints !== null ? `${prevPoints - p.totalPoints}` : "-"}</td>                        
                 )}
                 {showAdvanced && (
                   <td>{nextPoints !== null ? `+${p.totalPoints - nextPoints}` : "-"}</td>
