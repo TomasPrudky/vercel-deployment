@@ -12,7 +12,8 @@ const Serie = ({ onDataFetched, retryCount = 3, retryDelay = 2000 }) => {
 
     const fetchData = async (attempt = 1) => {
       try {
-        const response = await axios.get('http://localhost:5000/api/serie-a/');
+        const response = await axios.get('https://fantasy-table-server.vercel.app/api/serie-a/');
+        //const response = await axios.get('http://localhost:5000/api/serie-a/');
 
         if (!isCancelled && onDataFetchedRef.current) {
           onDataFetchedRef.current(response.data);
