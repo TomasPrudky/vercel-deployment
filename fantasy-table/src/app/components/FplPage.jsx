@@ -1,88 +1,37 @@
-import React, { useState } from 'react';
-import Fpl from './Fpl';
+'use client';
 
-const FplPage = () => {
+import React, { useState, useCallback } from 'react';
+import Fpl from './Fpl';
+import FantasyTable from './FantasyTable';
+import { players } from '../data/players';
+
+export default function FplPage() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
-  const [showAdvanced, setShowAdvanced] = useState(false); // kontrola rozšířených statistik
 
-  const handleDataFetched = (data) => {
-    if (data.error) setError(data.error);
-    else setData(data);
-  };
+  const handleDataFetched = useCallback((res) => {
+    if (res?.error) setError(res.error);
+    else setData(res);
+  }, []);
 
-  const getMedal = (index, totalPlayers) => {
-    if (index === 0) return "🥇";
-    if (index === 1) return "🥈";
-    if (index === 2) return "🥉";
-    if (index === totalPlayers - 1) return "💩";
-    return index + 1;
-  };
+  const rawRows = data?.standings?.results || [];
+  const normalizedRows = rawRows.map(item => {
+    const player = players.find(p => p.sourceA === item.entry);
+    return {
+      key: item.entry || item.id,
+      playerName: player ? player.name : item.player_name,
+      teamName: item.entry_name,
+      totalPoints: item.total || 0,
+    };
+  });
 
   return (
-    <div>
-      <h1>PL Fantasy results</h1>
-      <label style={{ display: 'block', marginBottom: '10px' }}>
-        <input
-          type="checkbox"
-          checked={showAdvanced}
-          onChange={(e) => setShowAdvanced(e.target.checked)}
-        />{" "}
-        Show advanced stats
-      </label>
-      <Fpl onDataFetched={handleDataFetched} />
-      {error && <p>Error: {error}</p>}
-      {data ? (
-        <div>
-          {data.standings.results.length > 0 ? (
-            <table>
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Player Name</th>
-                  <th>Team Name</th>
-                  <th>Total Points</th>
-                  {showAdvanced && <th>Diff to Next</th>}
-                  {showAdvanced && <th>Diff to Previous</th>}
-                </tr>
-              </thead>
-              <tbody>
-                {[...data.standings.results]
-                  .sort((a, b) => b.total - a.total)
-                  .map((row, index, arr) => {
-                    const diffToPrev =
-                      index > 0 ? row.total - arr[index - 1].total : null;
-                    const diffToNext =
-                      index < arr.length - 1
-                        ? row.total - arr[index + 1].total
-                        : null;
-
-                    return (
-                      <tr key={row.id || index}>
-                        <td>{getMedal(index, arr.length)}</td>
-                        <td>{row.player_name}</td>
-                        <td>{row.entry_name}</td>
-                        <td>{row.total}</td>
-                        {showAdvanced && (
-                          <td>{diffToPrev !== null ? `${diffToPrev}` : "-"}</td>
-                        )}
-                        {showAdvanced && (
-                          <td>{diffToNext !== null ? `+${diffToNext}` : "-"}</td>
-                        )}
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-          ) : (
-            <p>No data available</p>
-          )}
-        </div>
-      ) : (
-        <p>Loading FPL Data...</p>
-      )}
-    </div>
+    <FantasyTable
+      title="PL Fantasy results"
+      rows={normalizedRows}
+      loading={!data && !error}
+      error={error}
+      LoaderComponent={<Fpl onDataFetched={handleDataFetched} />}
+    />
   );
-};
-
-export default FplPage;
+}

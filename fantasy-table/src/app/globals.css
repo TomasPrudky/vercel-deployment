@@ -1,96 +1,182 @@
-/* Nastavení základních stylů pro celou stránku */
-html, body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;   /* vystředí i na šířku */
-    justify-content: center;
-    min-height: 100vh;
-    flex-direction: column;
-    overflow-x: hidden; 
-    width: 100%;
+:root {
+  --bg-main: #f8fafc;
+  --card-bg: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --accent-gold: #fef9c3;
+  --accent-silver: #e2e8f0;
+  --accent-bronze: #ffedd5;
+  --accent-last: #ebdcd2;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
 }
 
-/* Styl kontejneru pro tabulky */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Hlavní layout */
+main {
+  max-width: 950px;
+  margin: 0 auto;
+  padding: 16px 12px;
+  position: relative;
+}
+
+@media (min-width: 640px) {
+  main {
+    padding: 32px 20px;
+  }
+}
+
+/* Kartový kontejner – z-index zajistí, že míč letí VŽDY pod kartou */
 .table-container {
-    background-color: #ffffff;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    width: 95%;
-    max-width: 1000px;
-    margin: 20px auto;
-    text-align: center;
-    overflow-x: hidden;
+  background: var(--card-bg);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 640px) {
+  .table-container {
+    padding: 24px;
+  }
 }
 
 /* Nadpisy */
 h1 {
-    color: #333;
-    font-size: 20px;
-    margin-bottom: 15px;
-    text-align: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px 0;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* Globální styly pro tabulku */
+/* Ovládací prvky */
+.controls-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: 16px;
+  user-select: none;
+}
+
+.controls-label input[type="checkbox"] {
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Responzivní wrapper pro scrollování tabulky */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: #ffffff;
+}
+
+/* Globální tabulka */
 table {
-    width: 100%;             /* tabulka vždy na 100% šířky rodiče */
-    border-collapse: collapse;
-    margin: 10px 0;
-    font-size: 14px;         /* menší font, aby se víc vešlo */
-    text-align: center;
-    background: linear-gradient(to bottom, #b9ffb9 0%, #ff9898 100%);
-
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.875rem;
+  white-space: nowrap;
 }
 
-/* Hlavičky tabulky */
-th, td {
-    padding: 8px 10px;       /* menší padding → tabulka se víc smrskne */
-    border-bottom: 1px solid #ddd;
-    text-align: center;
-    word-break: break-word;  /* text se zalamuje, nikdy nepřetéká */
-}
-
-/* Styly pro hlavičky tabulky */
 th {
-    background-color: #555;
-    color: #f1f1f1;
-    font-weight: bold;
-    border-bottom: 2px solid #666;
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
 }
 
-/* Zvýraznění řádků při najetí myší */
-tr:hover {
-    background-color: #f5f5f5;
+td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-variant-numeric: tabular-nums;
 }
 
-/* Specifické styly pro jednotlivé komponenty */
-.complete-table-container, .fpl-page-container, .serie-page-container {
-    margin: 20px 0;
+/* Zarovnání buněk */
+th:first-child, td:first-child {
+  text-align: center;
+  width: 50px;
 }
 
-/* Oddělovací čára */
+th:nth-child(n+3), td:nth-child(n+3) {
+  text-align: right;
+}
+
+/* Sjednocené zvýraznění prvních 3 a posledního místa pro VŠECHNY tabulky */
+tbody tr:first-child {
+  background-color: var(--accent-gold);
+  font-weight: 600;
+}
+
+tbody tr:nth-child(2) {
+  background-color: var(--accent-silver);
+}
+
+tbody tr:nth-child(3) {
+  background-color: var(--accent-bronze);
+}
+
+tbody tr:last-child {
+  background-color: var(--accent-last);
+}
+
+tbody tr:hover {
+  filter: brightness(0.97);
+  transition: filter 0.15s ease;
+}
+
+/* Badge / Diff styly */
+.diff-positive {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.diff-negative {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+/* Oddělovač */
 hr {
-    margin: 20px auto;
-    border: none;
-    border-top: 2px solid #333;
-}
-
-table tbody tr {
-    background: transparent;
-}
-
-/* Responzivní úpravy */
-@media (min-width: 768px) {
-    .table-container {
-        width: 80%;   /* na tabletu a větších zařízeních to nebude tak široké */
-    }
-}
-
-@media (min-width: 1200px) {
-    .table-container {
-        width: 60%;   /* na velkých monitorech bude tabulka ještě uprostřed a užší */
-    }
+  border: none;
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 32px 0;
+  position: relative;
+  z-index: 1;
 }

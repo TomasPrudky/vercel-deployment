@@ -6,9 +6,9 @@ const Fpl = ({ onDataFetched, retryCount = 30, retryDelay = 100 }) => {
   useEffect(() => {
     const fetchData = async (attempt = 1) => {
       try {
-        const response = await axios.get('https://fantasy-table-server.vercel.app/api/fpl/');
-        //const response = await axios.get('http://localhost:5000/api/fpl/');
-
+        
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://fantasy-table-server.vercel.app';
+        const response = await axios.get(`${API_BASE}/api/fpl/`);
         
         if (onDataFetched) {
           onDataFetched(response.data); // Zavolej callback s daty
