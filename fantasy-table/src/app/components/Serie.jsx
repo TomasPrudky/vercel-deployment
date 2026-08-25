@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import axios from 'axios';
 
-const Serie = ({ onDataFetched, retryCount = 3, retryDelay = 2000 }) => {
+const Serie = ({ onDataFetched, retryCount = 30, retryDelay = 100 }) => {
   // Držíme referenci na callback, aby nemusel být v dependency array
   const onDataFetchedRef = useRef(onDataFetched);
   onDataFetchedRef.current = onDataFetched;

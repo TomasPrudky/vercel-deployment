@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 
-const Fpl = ({ onDataFetched, retryCount = 3, retryDelay = 2000 }) => {
+const Fpl = ({ onDataFetched, retryCount = 30, retryDelay = 100 }) => {
   useEffect(() => {
     const fetchData = async (attempt = 1) => {
       try {
