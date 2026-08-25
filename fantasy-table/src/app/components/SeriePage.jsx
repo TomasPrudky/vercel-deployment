@@ -18,7 +18,6 @@ export default function SeriePage() {
   const normalizedRows = rawRows.map(item => {
     const player = players.find(p => p.sourceB === (item.teamId || item.id));
     let points = item.totalPoints ?? item.points ?? 0;
-    if (player?.id === 2) points += 54; // bonus pro Stenclika
 
     return {
       key: item.teamId || item.id,
