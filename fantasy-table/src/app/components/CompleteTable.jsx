@@ -42,7 +42,6 @@ export default function CompleteTable() {
           const fplPlayer = fplList.find(item => item.entry === p.sourceA);
 
           let seriePoints = seriePlayer?.totalPoints ?? seriePlayer?.points ?? 0;
-          if (p.id === 2) seriePoints += 54; // bonus pro Stenclika
 
           const fplPoints = fplPlayer?.total || 0;
           const totalPoints = seriePoints + fplPoints;
