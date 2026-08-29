@@ -38,7 +38,7 @@ export default function FantasyTable({ title, rows, loading, error, LoaderCompon
               <tr>
                 <th>Rank</th>
                 <th>Player Name</th>
-                <th>Team Name</th>
+                <th className="hidden-on-mobile">Team Name</th>
                 <th>Total Points</th>
                 {showAdvanced && <th>Diff to Previous</th>}
                 {showAdvanced && <th>Diff to Next</th>}
@@ -55,7 +55,7 @@ export default function FantasyTable({ title, rows, loading, error, LoaderCompon
                     <tr key={row.key || index}>
                       <td>{getMedal(index, arr.length)}</td>
                       <td>{row.playerName}</td>
-                      <td>{row.teamName}</td>
+                      <td className="hidden-on-mobile">{row.teamName}</td>
                       <td>{row.totalPoints}</td>
                       {showAdvanced && (
                         <td>{diffToPrev !== null ? `${diffToPrev}` : "-"}</td>

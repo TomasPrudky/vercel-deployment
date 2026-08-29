@@ -10,7 +10,7 @@ export default function CompleteTable() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [showDominance, setShowDominance] = useState(false);
   const [showSimulator, setShowSimulator] = useState(false);
-  
+
   const [simulatedPoints, setSimulatedPoints] = useState({});
 
   const players = [
@@ -26,9 +26,9 @@ export default function CompleteTable() {
   ];
 
   useEffect(() => {
-    const fetchData = async () => {      
+    const fetchData = async () => {
       try {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://fantasy-table-server.vercel.app';
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL;
         const [serieRes, fplRes] = await Promise.all([
           axios.get(`${API_BASE}/api/serie-a/`),
           axios.get(`${API_BASE}/api/fpl/`)
@@ -130,6 +130,22 @@ export default function CompleteTable() {
     <div className="table-container" suppressHydrationWarning>
       <h1>Complete Fantasy Table 25/26</h1>
 
+      <a
+        href="https://www.livefpl.net/leagues/11825"
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-block',
+          marginBottom: '16px',
+          color: '#2563eb',
+          textDecoration: 'none',
+          fontWeight: '600',
+          fontSize: '0.9rem'
+        }}
+      >
+        🔗 LiveFPL League
+      </a>
+
       <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', marginBottom: '16px' }}>
         <label className="controls-label">
           <input
@@ -194,7 +210,7 @@ export default function CompleteTable() {
           </div>
 
           {/* Zajímavost / Specialisté */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}/>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }} />
         </div>
       )}
 
@@ -306,7 +322,7 @@ export default function CompleteTable() {
 
                   {showDominance && (
                     <td style={{ minWidth: '130px', verticalAlign: 'middle' }}>
-                      <div 
+                      <div
                         title={`FPL: ${p.displayFpl} b. (${p.fplShare}%) | Serie A: ${p.displaySerie} b. (${p.serieShare}%)`}
                         style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}
                       >
@@ -333,7 +349,7 @@ export default function CompleteTable() {
                     <td>{leaderPoints - p.displayTotal}</td>
                   )}
                   {showAdvanced && (
-                    <td>{prevPoints !== null ? `${prevPoints - p.displayTotal}` : "-"}</td>                        
+                    <td>{prevPoints !== null ? `${prevPoints - p.displayTotal}` : "-"}</td>
                   )}
                   {showAdvanced && (
                     <td>{nextPoints !== null ? `+${p.displayTotal - nextPoints}` : "-"}</td>
