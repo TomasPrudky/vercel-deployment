@@ -1,10 +1,9 @@
 const express = require('express');
 const axios = require('axios');
 const cors = require('cors');
-const cheerio = require('cheerio');
 const dotenv = require('dotenv');
 
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,53 +23,38 @@ app.get('/api/fpl/', async (req, res) => {
   }
 });
 
-// Endpoint pro Serie A (Tattico) – vrací pouze pole řádků tabulky
+// Endpoint pro Serie A (Tattico League Standings API)
 app.get('/api/serie-a/', async (req, res) => {
   try {
-    const response = await axios.get('https://tattico.com/leagues/o-pohar-krale-vojtecha-i');
-    const $ = cheerio.load(response.data);
-    console.log($);
-    const tableData = [];
+    const page = req.query.page || 1;
+    const perPage = req.query.per_page || 50;
+    // Použije slug z env proměnné nebo výchozí slug z původního Cheerio skriptu
+    const leagueSlug = process.env.NEXT_PUBLIC_TATTICO_LEAGUE_SLUG || 'o-pohar-krale-vojtecha-i';
 
-    $('table tbody tr').each((index, element) => {
-      const cols = $(element).find('td');
-      if (cols.length >= 8) {
-        const teamAnchor = $(cols[1]).find('a');
-        const teamName = teamAnchor.text().trim();
-        const teamHref = teamAnchor.attr('href') || '';
-
-        // Vytáhne ID týmu z URL tvaru /points/{teamId}/{gameweek}
-        const matchId = teamHref.match(/\/points\/(\d+)/);
-        const teamId = matchId ? parseInt(matchId[1], 10) : null;
-
-        // Vytáhne zemi manažera (title v spanu) a čisté jméno manažera
-        const country = $(cols[2]).find('span[title]').attr('title') || '';
-        const managerName = $(cols[2]).find('span > span:last-child').text().trim() || $(cols[2]).text().trim();
-
-        tableData.push({
-          rank: parseInt($(cols[0]).text().trim(), 10) || index + 1,
-          teamId,
-          teamName,
-          manager: managerName,
-          country,
-          chip: $(cols[3]).find('img').attr('title') || null,
-          played: $(cols[4]).text().trim(),
-          captain: $(cols[5]).text().trim(),
-          gwPoints: parseInt($(cols[6]).text().trim(), 10) || 0,
-          totalPoints: parseInt($(cols[7]).text().trim(), 10) || 0,
-          teamUrl: teamHref ? `https://tattico.com${teamHref}` : null,
-        });
-
-        console.log(`Parsed row ${index + 1}:`, tableData[tableData.length - 1]); // Loguje každý řádek pro kontrolu
+    const response = await axios.get(
+      `https://tattico.com/api/v1/leagues/${leagueSlug}/standings`,
+      {
+        params: {
+          page: page,
+          per_page: perPage,
+        },
+        headers: {
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TATTICO_API_KEY}`,
+          'Accept': 'application/json',
+        },
       }
-    });
+    );
 
-    // Vrátí pouze samotné pole
-    res.json(tableData);
+    res.json(response.data);
 
   } catch (error) {
-    console.error('Error fetching Serie A data:', error.message);
-    res.status(500).json({ error: 'Failed to fetch data' });
+    console.error('Error fetching Serie A data:', error.response?.data || error.message);
+    
+    const statusCode = error.response?.status || 500;
+    res.status(statusCode).json({ 
+      error: 'Failed to fetch Serie A data',
+      details: error.response?.data || null 
+    });
   }
 });
 
