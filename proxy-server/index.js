@@ -39,7 +39,7 @@ app.get('/api/serie-a/', async (req, res) => {
           per_page: perPage,
         },
         headers: {
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_TATTICO_API_KEY}`,
+          'Authorization': `Bearer ${process.env.TATTICO_API_KEY}`,
           'Accept': 'application/json',
         },
       }
